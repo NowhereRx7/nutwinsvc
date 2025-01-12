@@ -23,5 +23,7 @@ namespace NutWinSvc.Nut
         /// and a reference to the inner exception that is the cause of this exception.
         /// </summary>
         public NutException(string? message, Exception? innerException = null) : base(message, innerException) { }
+
+        internal NutException(CommandResult result) : base("Server returned error " + result.Error.ToString() + (result.Data != null ? result.Data.ToString() : string.Empty)) { }
     }
 }
