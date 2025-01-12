@@ -12,7 +12,7 @@ namespace NutWinSvc.Nut
     /// <param name="command">The command that was execute.</param>
     /// <param name="error">An <see cref="Error"> result.</param>
     /// <param name="data">Any addition data returned by the command.</param>
-    internal class CommandResult(Command command, Error error, object? data)
+    public class CommandResult(Command command, Error error, object? data)
     {
         /// <summary>
         /// Gets the <see cref="Command"/> that was executed.

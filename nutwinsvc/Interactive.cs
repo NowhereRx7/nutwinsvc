@@ -43,7 +43,7 @@ internal static class Interactive
     {
         if (!Environment.IsPrivilegedProcess)
         {
-            Console.WriteLine("Commands require elevated privileges.");
+            Console.WriteLine("Command requires elevated privileges.");
             Environment.Exit(5);
         }
     }

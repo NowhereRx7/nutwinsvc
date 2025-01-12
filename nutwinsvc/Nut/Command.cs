@@ -1,6 +1,6 @@
 ﻿namespace NutWinSvc.Nut
 {
-    internal enum Command
+    public enum Command
     {
         VER,
         NETVER,

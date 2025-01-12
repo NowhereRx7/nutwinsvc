@@ -42,14 +42,14 @@ public static class Extensions
         return error.ToString().Replace("_", "-");
     }
 
-    public static Error ToError(this string err)
+    public static Error ToError(this string nutErrorMessage)
     {
-        err = err.Trim().ToUpperInvariant();
-        if (err.StartsWith("ERR"))
-            err = err[3..].TrimEnd();
-        if (err.Contains(' '))
-            err = err.Remove(err.IndexOf(' ')).TrimEnd();
-        if (Enum.TryParse(typeof(Error), err.ToUpperInvariant().Replace("-", "_"), out var result))
+        nutErrorMessage = nutErrorMessage.Trim().ToUpperInvariant();
+        if (nutErrorMessage.StartsWith("ERR"))
+            nutErrorMessage = nutErrorMessage[3..].TrimEnd();
+        if (nutErrorMessage.Contains(' '))
+            nutErrorMessage = nutErrorMessage.Remove(nutErrorMessage.IndexOf(' ')).TrimEnd();
+        if (Enum.TryParse(typeof(Error), nutErrorMessage.ToUpperInvariant().Replace("-", "_"), out var result))
             return (Error)result;
         else
             return Error.UNKNOWN;

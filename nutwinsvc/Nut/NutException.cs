@@ -8,6 +8,8 @@ namespace NutWinSvc.Nut
 {
     public class NutException : Exception
     {
+        public CommandResult? CommandResult { get; init; } = default;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="NutException"/> class.
         /// </summary>
@@ -24,6 +26,10 @@ namespace NutWinSvc.Nut
         /// </summary>
         public NutException(string? message, Exception? innerException = null) : base(message, innerException) { }
 
-        internal NutException(CommandResult result) : base("Server returned error " + result.Error.ToString() + (result.Data != null ? result.Data.ToString() : string.Empty)) { }
+        //TODO: Should I make a new exception for command ERR results?
+        internal NutException(CommandResult result) : base("Server returned error " + result.Error.ToString() + (result.Data != null ? result.Data.ToString() : string.Empty))
+        {
+            CommandResult = result;
+        }
     }
 }
