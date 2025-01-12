@@ -28,7 +28,7 @@ namespace NutWinSvc
         {
             Console.WriteLine("Adding service...");
             using RegistryKey reg = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services", true) ?? throw new InvalidOperationException("Could not open Services registry.");
-            if (!reg.GetSubKeyNames().Contains(serviceShortName, StringComparer.InvariantCultureIgnoreCase))
+            if (!reg.GetSubKeyNames().Contains(serviceShortName, StringComparer.OrdinalIgnoreCase))
             {
                 using RegistryKey svcReg = reg.CreateSubKey(serviceShortName, true) ?? throw new InvalidOperationException("Could not create Services registry key.");
                 svcReg.SetValue("Description", "Network UPS Tools Windows monitoring and shutdown service");
@@ -68,7 +68,7 @@ namespace NutWinSvc
             }
             Console.WriteLine("Removing service...");
             using RegistryKey reg = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services", true) ?? throw new InvalidOperationException("Could not open Services registry.");
-            if (reg.GetSubKeyNames().Contains(serviceShortName, StringComparer.InvariantCultureIgnoreCase))
+            if (reg.GetSubKeyNames().Contains(serviceShortName, StringComparer.OrdinalIgnoreCase))
                 reg.DeleteSubKeyTree(serviceShortName, false);
         }
     }

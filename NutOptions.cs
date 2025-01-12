@@ -9,6 +9,16 @@ internal partial class NutOptions : IValidateOptions<NutOptions>
 
     public string? Host { get; set; }
 
+    public int Port { get; set; } = 3493;
+
+    public bool UseTls { get; set; } = false;
+
+    public string? Username { get; set; }
+
+    public string? Password { get; set; } 
+
+
+
     public ValidateOptionsResult Validate(string? name, NutOptions options)
     {
         StringBuilder failure = new();
