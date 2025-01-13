@@ -26,7 +26,7 @@ internal partial class NutOptions : IValidateOptions<NutOptions>
             failure.AppendLine($"{nameof(UpsName)} cannot be null, empty, or whitespace.");
         if (string.IsNullOrWhiteSpace(options.Host))
             failure.AppendLine($"{nameof(Host)} cannot be null, empty, or whitespace");
-
+        //TODO: Finish options validation
 
         return (failure.Length > 0) ? ValidateOptionsResult.Fail(failure.ToString()) : ValidateOptionsResult.Success;
 

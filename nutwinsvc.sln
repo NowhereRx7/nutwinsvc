@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nutwinsvc", "nutwinsvc\nutw
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NutTest", "NutTest\NutTest.csproj", "{2D228674-19B4-43F0-970A-54DF31653EC7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NutClient", "NutClient\NutClient.csproj", "{BC01C6B6-19AC-46C2-9EC1-C778AF947542}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{2D228674-19B4-43F0-970A-54DF31653EC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D228674-19B4-43F0-970A-54DF31653EC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D228674-19B4-43F0-970A-54DF31653EC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC01C6B6-19AC-46C2-9EC1-C778AF947542}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC01C6B6-19AC-46C2-9EC1-C778AF947542}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC01C6B6-19AC-46C2-9EC1-C778AF947542}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC01C6B6-19AC-46C2-9EC1-C778AF947542}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

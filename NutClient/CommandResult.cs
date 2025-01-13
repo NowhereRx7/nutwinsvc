@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NutWinSvc.Nut
+namespace NutClient
 {
     /// <summary>
     /// Creates a new instance of the <see cref="CommandResult"/> class.
@@ -28,7 +28,7 @@ namespace NutWinSvc.Nut
         /// <summary>
         /// Gets any additional data that was returned by the command;
         /// <b>null</b> if no additional data was returned.<br />
-        /// This could be a string, string array, or an actual object created by the command result.
+        /// This could be a string or string array.
         /// </summary>
         public object? Data { get; } = data;
 
@@ -36,7 +36,7 @@ namespace NutWinSvc.Nut
         /// Creates a new instance of the <see cref="CommandResult"/> class
         /// with <see cref="Error"/> set to <see cref="Error.None"/>.
         /// </summary>
-        /// <inheritdoc cref="CommandResult.CommandResult(Command, Error, object?)" path="/param[@name=='command']"/>
+        /// <inheritdoc cref="CommandResult(Command, Error, object)" path="/param[@name=='command']"/>
         public CommandResult(Command command) : this(command, Error.None, null) { }
 
         /// <summary>
@@ -44,16 +44,16 @@ namespace NutWinSvc.Nut
         /// with <see cref="Error"/> set to <see cref="Error.None"/>
         /// and <see cref="Data"/> set to <paramref name="data"/>.
         /// </summary>
-        /// <inheritdoc cref="CommandResult.CommandResult(Command, Error, object?)" path="/param[@name=='command']"/>
-        /// <inheritdoc cref="CommandResult.CommandResult(Command, Error, object?)" path="/param[@name=='data']"/>
+        /// <inheritdoc cref="CommandResult(Command, Error, object)" path="/param[@name=='command']"/>
+        /// <inheritdoc cref="CommandResult(Command, Error, object)" path="/param[@name=='data']"/>
         public CommandResult(Command command, object? data) : this(command, Error.None, data) { }
 
         /// <summary>
         /// Creates a new instance of the <see cref="CommandResult"/> class
         /// with <see cref="Error"/> set to <paramref name="error"/>.
         /// </summary>
-        /// <inheritdoc cref="CommandResult.CommandResult(Command, Error, object?)" path="/param[@name=='command']"/>
-        /// <inheritdoc cref="CommandResult.CommandResult(Command, Error, object?)" path="/param[@name=='error']"/>
+        /// <inheritdoc cref="CommandResult(Command, Error, object)" path="/param[@name=='command']"/>
+        /// <inheritdoc cref="CommandResult(Command, Error, object)" path="/param[@name=='error']"/>
         public CommandResult(Command command, Error error) : this(command, error, null) { }
 
     }
