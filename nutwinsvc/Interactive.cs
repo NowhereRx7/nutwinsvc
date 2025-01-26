@@ -71,7 +71,7 @@ internal static class Interactive
         {
             UnregisterService();
             UnregisterEventLog();
-            //TODO: Option to delete settings
+            //TODO: Uninstall: Option to delete settings from registry
         }
         catch (InvalidOperationException ex)
         {
@@ -84,6 +84,6 @@ internal static class Interactive
     private static void Configure()
     {
         CheckElevated();
-        //TODO: Configuration prompts
+        //TODO: Configure: Configuration prompts
     }
 }

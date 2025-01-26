@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace NutClient;
 
-namespace NutClient
+/// <summary>
+/// The LIST sub-command.
+/// </summary>
+public enum ListCommand
 {
-    public enum ListCommand
-    {
-        CLIENT,
-        CMD,
-        ENUM,
-        RANGE,
-        RW,
-        UPS,
-        VAR,
-    }
+    CLIENT,
+    CMD,
+    ENUM,
+    RANGE,
+    RW,
+    UPS,
+    VAR,
 }

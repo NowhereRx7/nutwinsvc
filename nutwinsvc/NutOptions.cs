@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace NutWinSvc;
@@ -15,20 +16,23 @@ internal partial class NutOptions : IValidateOptions<NutOptions>
 
     public string? Username { get; set; }
 
-    public string? Password { get; set; } 
+    public string? Password { get; set; }
 
 
-
+    // I don't use DataAnnotations because trimming.
     public ValidateOptionsResult Validate(string? name, NutOptions options)
     {
+        if (options is null) return ValidateOptionsResult.Fail("Configuration object is null.");
         StringBuilder failure = new();
-        if (string.IsNullOrWhiteSpace(options.UpsName))
-            failure.AppendLine($"{nameof(UpsName)} cannot be null, empty, or whitespace.");
-        if (string.IsNullOrWhiteSpace(options.Host))
-            failure.AppendLine($"{nameof(Host)} cannot be null, empty, or whitespace");
-        //TODO: Finish options validation
-
+        ValidateOne(options.UpsName);
+        ValidateOne(options.Host);
+        ValidateOne(options.Username);
+        ValidateOne(options.Password);
         return (failure.Length > 0) ? ValidateOptionsResult.Fail(failure.ToString()) : ValidateOptionsResult.Success;
-
+        void ValidateOne(string? argument, [CallerArgumentExpression("argument")] string? paramName = null)
+        {
+            if (String.IsNullOrWhiteSpace(argument))
+                failure.AppendLine($"{paramName} cannot be null, empty, or whitespace.");
+        }
     }
 }

@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace NutClient;
 
-namespace NutClient
+/// <summary>
+/// The the GET sub-command.
+/// </summary>
+public enum GetCommand
 {
-    public enum GetCommand
-    {
-        CMDDESC,
-        DESC,
-        NUMLOGINS,
-        TRACKING,
-        TYPE,
-        UPSDESC,
-        VAR,
-    }
+    CMDDESC,
+    DESC,
+    NUMLOGINS,
+    TRACKING,
+    TYPE,
+    UPSDESC,
+    VAR,
 }

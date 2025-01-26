@@ -26,7 +26,7 @@ namespace NutClient
         /// </summary>
         public NutException(string message, Exception innerException) : base(message, innerException) { }
 
-        //TODO: Should I make a new exception for command ERR results?
+        //TODO: NutException: Should I make a new exception for command ERR results?
         internal NutException(CommandResult result) : base("Server returned error " + result.Error.ToString() + (result.Data != null ? result.Data.ToString() : string.Empty))
         {
             CommandResult = result;

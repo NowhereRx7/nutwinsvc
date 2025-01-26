@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace NutClient;
 
-namespace NutClient;
-
+/// <summary>
+/// An enumeration of errors that the NUT server could respond with.
+/// </summary>
 public enum Error
 {
     None,
@@ -35,13 +32,19 @@ public enum Error
     UNKNOWN
 }
 
-internal static class Extensions
+public static partial class Extensions
 {
-    public static string ToNutString(this Error error)
-    {
-        return error.ToString().Replace("_", "-");
-    }
+    public static string ToNutString(this Error error) => Enum.GetName<Error>(error)?.Replace("_", "-") ?? string.Empty;
 
+    /// <summary>
+    /// Converts an ERR string to an <see cref="Error"/> value.
+    /// </summary>
+    /// <param name="nutErrorMessage">
+    /// The ERR message from the server (whole or partial).
+    /// </param>
+    /// <returns>
+    /// An <see cref="Error"/> value; or <see cref="Error.UNKNOWN"/> if unable to determine.
+    /// </returns>
     public static Error ToError(this string nutErrorMessage)
     {
         nutErrorMessage = nutErrorMessage.Trim().ToUpperInvariant();

@@ -1,4 +1,5 @@
-﻿using System.Net.Security;
+﻿using Microsoft.Extensions.Logging;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -8,16 +9,19 @@ namespace NutClient;
 /// <summary>
 /// A client for communicating with a NUT server.
 /// </summary>
-public class NutClient : IDisposable
+public partial class NutClient : IDisposable
 {
+    //TODO: I should move some of this up into an inheriting class; make this a Base class with very basic access methods
+
     private readonly string host;
-    private readonly string upsName;
     private readonly int port;
+    private readonly string upsName;
     private readonly string username;
     private readonly string password;
     private readonly bool useTls;
     private readonly TcpClient client = new() { SendTimeout = 10000, ReceiveTimeout = 10000 };
     private Stream stream = Stream.Null;
+    private ILogger? logger = default;
 
     public string Host => host;
 
@@ -36,7 +40,7 @@ public class NutClient : IDisposable
     public Version? ProtocolVersion { get; private set; } = default;
 
 
-    public NutClient(string host, string upsName, string username, string password, bool useTls = false, int port = 3493)
+    public NutClient(string host, string upsName, string username, string password, bool useTls = false, int port = 3493, ILogger? logger = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(host);
         ArgumentException.ThrowIfNullOrWhiteSpace(upsName);
@@ -48,6 +52,7 @@ public class NutClient : IDisposable
         this.useTls = useTls;
         this.username = username;
         this.password = password;
+        this.logger = logger;
     }
 
 
@@ -307,10 +312,7 @@ public class NutClient : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    ~NutClient()
-    {
-        Dispose(false);
-    }
+    ~NutClient() => Dispose(false);
 
     #endregion
 
