@@ -5,7 +5,7 @@ VisualStudioVersion = 17.12.35514.174
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nutwinsvc", "nutwinsvc\nutwinsvc.csproj", "{B66880ED-F7B5-460D-B486-A52505269DA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NutTest", "NutTest\NutTest.csproj", "{2D228674-19B4-43F0-970A-54DF31653EC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nutwinsvc.Tests", "NutTest\nutwinsvc.Tests.csproj", "{2D228674-19B4-43F0-970A-54DF31653EC7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NutClient", "NutClient\NutClient.csproj", "{BC01C6B6-19AC-46C2-9EC1-C778AF947542}"
 EndProject

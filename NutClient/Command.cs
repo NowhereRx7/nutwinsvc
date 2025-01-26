@@ -2,11 +2,17 @@
 {
     public enum Command
     {
-        [Obsolete("Needs more investigating")]
+        /// <summary>
+        /// Gets the NUT version.
+        /// </summary>
         VER,
-        [Obsolete("Use PROTVER when ver > 2.8.0")]
+        /// <summary>
+        /// Gets the protocol version.
+        /// </summary>
         NETVER,
-        [Obsolete("Needs more investigating")]
+        /// <summary>
+        /// Alias of NETVER, but only valid on VER >= 2.8.0
+        /// </summary>
         PROTVER,
         HELP,
         STARTTLS,
@@ -16,8 +22,10 @@
         PASSWORD,
         LOGIN,
         LOGOUT,
-        [Obsolete("Use PRIMARY when ver > 2.8.0")]
         MASTER,
+        /// <summary>
+        /// Alias of MASTER on VER >= 2.8.0
+        /// </summary>
         PRIMARY,
         FSD,
         SET,

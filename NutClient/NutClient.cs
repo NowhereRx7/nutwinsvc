@@ -1,6 +1,7 @@
 ﻿using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace NutClient;
 
@@ -28,15 +29,12 @@ public class NutClient : IDisposable
 
     public bool UsingTls => stream is SslStream;
 
-    //public string ServerVersion { get; private set; } = string.Empty;
+    public bool IsLoggedIn { get; private set; } = false;
 
-    //public string ProtocolVersion { get; private set; } = string.Empty;
+    public Version? ServerVersion { get; private set; } = default;
 
-    public event EventHandler? ClientDisconnected;
-    protected virtual void OnClientDisconnected()
-    {
-        ClientDisconnected?.Invoke(this, EventArgs.Empty);
-    }
+    public Version? ProtocolVersion { get; private set; } = default;
+
 
     public NutClient(string host, string upsName, string username, string password, bool useTls = false, int port = 3493)
     {
@@ -52,12 +50,17 @@ public class NutClient : IDisposable
         this.password = password;
     }
 
+
     public async Task OpenAsync(CancellationToken cancellationToken)
     {
+        if (Connected)
+            throw new NutException("Client is already connected.", new InvalidOperationException("The socket is already connected."));
         await ConnectAsync(cancellationToken);
+        await GetVersionsAsync(cancellationToken);
         await TryStartTlsAsync(cancellationToken);
         await AuthenticateAsync(cancellationToken);
     }
+
 
     public async Task<CommandResult> ExecuteCommandAsync(Command command) => await ExecuteCommandAsync(command, [], CancellationToken.None);
     public async Task<CommandResult> ExecuteCommandAsync(Command command, CancellationToken cancellationToken) => await ExecuteCommandAsync(command, [], cancellationToken);
@@ -67,10 +70,10 @@ public class NutClient : IDisposable
             throw new NutException("Client is not connected!");
         StringBuilder cmd = new();
         cmd.Append(command.ToString());
-        if (command == Command.GET || command == Command.LIST)
-            if (args.Length < 1) throw new ArgumentException($"{command} requires arguments!");
-            else if (command == Command.SET)
-                if (args.Length < 2) throw new ArgumentException($"{command} requires arguments!");
+        if ((command == Command.GET || command == Command.LIST) && args.Length < 1)
+            throw new ArgumentException($"{command} requires arguments!");
+        else if (command == Command.SET && args.Length < 2)
+            throw new ArgumentException($"{command} requires arguments!");
         foreach (string arg in args)
             cmd.Append(" " + arg);
         await WriteStreamAsync(cmd.ToString());
@@ -82,13 +85,17 @@ public class NutClient : IDisposable
             string[] a = response[0].Split(" ", 3);
             if (a.Length < 2)
                 return new CommandResult(command, Error.UNKNOWN, response[0]);
-            return new CommandResult(command, a[1].ToError(), response[2] ?? null);
+            else
+                return new CommandResult(command, a[1].ToError(), a.Length > 2 ? a[2] : null);
         }
         switch (command)
         {
             case Command.LOGOUT:
                 if (response[0].StartsWith("OK") || response[0].StartsWith("Goodbye"))
+                {
+                    IsLoggedIn = false;
                     return new CommandResult(command);
+                }
                 else
                     return new CommandResult(command, Error.UNKNOWN, response);
             case Command.FSD:
@@ -110,11 +117,16 @@ public class NutClient : IDisposable
                 throw new NotImplementedException();
             case Command.LIST:
                 throw new NotImplementedException();
+            case Command.VER:
+            case Command.NETVER:
+            case Command.PROTVER:
+                return new CommandResult(command, response[0]);
             default:
                 break;
         }
         return new CommandResult(command, response.Length == 1 ? response[0] : response);
     }
+
 
     private async Task ConnectAsync(CancellationToken cancellationToken)
     {
@@ -132,7 +144,7 @@ public class NutClient : IDisposable
             {
                 throw new TimeoutException();
             }
-            if (!client.Connected)
+            if (!Connected)
                 throw new TimeoutException();
             stream = client.GetStream();
         }
@@ -141,6 +153,7 @@ public class NutClient : IDisposable
             throw new NutException("Could not connect!", ex);
         }
     }
+
 
     private async Task TryStartTlsAsync(CancellationToken cancellationToken)
     {
@@ -158,27 +171,57 @@ public class NutClient : IDisposable
         catch { }
     }
 
+
+    private async Task GetVersionsAsync(CancellationToken cancellationToken)
+    {
+        Regex rex = new(@"\d?\.\d?(|\.\d?)");
+        try
+        {
+            CommandResult result = await ExecuteCommandAsync(Command.VER, cancellationToken);
+            if (result.Error == Error.None)
+            {
+                string s = result.Data as string ?? string.Empty;
+                if (rex.IsMatch(s) && Version.TryParse(rex.Match(s).Value, out var version))
+                    ServerVersion = version;
+            }
+        }
+        catch (Exception) { }
+        try
+        {
+            CommandResult result = await ExecuteCommandAsync(Command.NETVER, cancellationToken);
+            if (result.Error == Error.None)
+            {
+                string s = result.Data as string ?? string.Empty;
+                if (rex.IsMatch(s) && Version.TryParse(rex.Match(s).Value, out var version))
+                    ProtocolVersion = version;
+            }
+        }
+        catch (Exception) { }
+    }
+
+
     private async Task AuthenticateAsync(CancellationToken cancellationToken)
     {
-        CommandResult result = await ExecuteCommandAsync(Command.LOGIN, [UpsName], cancellationToken);
-        if (result.Error != Error.None)
-            throw new NutException(result);
-        result = await ExecuteCommandAsync(Command.USERNAME, [username], cancellationToken);
+        CommandResult result = await ExecuteCommandAsync(Command.USERNAME, [username], cancellationToken);
         if (result.Error != Error.None)
             throw new NutException(result);
         result = await ExecuteCommandAsync(Command.PASSWORD, [password], cancellationToken);
         if (result.Error != Error.None)
             throw new NutException(result);
-        //result = await ExecuteCommand(Command.VER, cancellationToken);
-        //if (result.Error == Error.None)
-        //    ServerVersion = result.Data as string ?? string.Empty;
+        //TODO: LOGIN is really only for upsmon clients.  Which works for this app, but should be broken out.
+        result = await ExecuteCommandAsync(Command.LOGIN, [UpsName], cancellationToken);
+        if (result.Error == Error.None)
+            IsLoggedIn = true;
+        else
+            throw new NutException(result);
     }
+
 
     private async Task WriteStreamAsync(string command)
     {
-        if (!client.Connected)
+        if (!Connected)
             throw new NutException("Client not connected!");
-        using StreamWriter sw = new(stream, Encoding.ASCII) { AutoFlush = true };
+        using StreamWriter sw = new(stream, encoding: Encoding.ASCII, leaveOpen: true) { AutoFlush = true, NewLine = "\n" };
         try
         {
             await sw.WriteLineAsync(command);
@@ -189,12 +232,13 @@ public class NutClient : IDisposable
         }
     }
 
+
     private async Task<string[]?> GetResponseAsync(Command command, CancellationToken cancellationToken)
     {
-        if (!client.Connected)
+        if (!Connected)
             throw new NutException("Client not connected!");
         List<string> response = [];
-        using StreamReader sr = new(stream, Encoding.ASCII);
+        using StreamReader sr = new(stream, encoding: Encoding.ASCII, leaveOpen: true);
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -215,6 +259,10 @@ public class NutClient : IDisposable
                         response.Add(line);
                 } while (!line.StartsWith("END " + command.ToString()));
             }
+            else if (!String.IsNullOrEmpty(line.Trim()))
+            {
+                response.Add(line.Trim());
+            }
         }
         catch (OperationCanceledException) { throw; }
         catch (Exception ex)
@@ -224,23 +272,33 @@ public class NutClient : IDisposable
         return response.Count == 0 ? null : [.. response];
     }
 
+
     #region "IDisposable"
 
-    private bool disposed = false;
-    protected virtual void Dispose(bool disposing)
+    private int _disposed;
+    protected virtual async void Dispose(bool disposing)
     {
-        if (disposed) return;
+        if (Interlocked.Exchange(ref _disposed, 1) > 0) return;
         if (disposing)
         {
+            if (IsLoggedIn)
+                try
+                {
+                    await ExecuteCommandAsync(Command.LOGOUT);
+                }
+                catch { }
             if (stream != null && stream is SslStream)
                 stream.Dispose();
             if (client != null)
             {
-                client.Close();
+                try
+                {
+                    client.Close();
+                }
+                catch { }
                 client.Dispose();
             }
         }
-        disposed = true;
     }
 
     public void Dispose()

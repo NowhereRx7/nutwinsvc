@@ -35,7 +35,7 @@ public enum Error
     UNKNOWN
 }
 
-public static class Extensions
+internal static class Extensions
 {
     public static string ToNutString(this Error error)
     {

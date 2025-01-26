@@ -23,11 +23,13 @@ namespace NutWinSvc
             var builder = Host.CreateApplicationBuilder();
             builder.Services.AddWindowsService(options => options.ServiceName = "Network UPS Tools Service");
             builder.Logging.AddEventLog(config => config.SourceName = EventSourceName);
+#if !DEBUG
             builder.Configuration.Add<RegistryConfigurationSource>(config =>
             {
                 config.RegistryHive = Microsoft.Win32.RegistryHive.LocalMachine;
                 config.Path = @"SOFTWARE\NutWinSvc";
             });
+#endif
             builder.Services.AddOptions<NutOptions>().Bind(builder.Configuration.GetSection("NutWinSvc")).ValidateOnStart();
 
             builder.Services.AddHostedService<CoreService>();
