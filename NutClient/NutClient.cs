@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -16,8 +17,6 @@ public partial class NutClient : IDisposable
     private readonly string host;
     private readonly int port;
     private readonly string upsName;
-    private readonly string username;
-    private readonly string password;
     private readonly bool useTls;
     private readonly TcpClient client = new() { SendTimeout = 10000, ReceiveTimeout = 10000 };
     private Stream stream = Stream.Null;
@@ -33,43 +32,52 @@ public partial class NutClient : IDisposable
 
     public bool UsingTls => stream is SslStream;
 
-    public bool IsLoggedIn { get; private set; } = false;
+    public bool IsLoggedIn { get; protected set; } = false;
 
-    public Version? ServerVersion { get; private set; } = default;
+    public Version? ServerVersion { get; protected set; } = default;
 
-    public Version? ProtocolVersion { get; private set; } = default;
+    public Version? ProtocolVersion { get; protected set; } = default;
 
 
-    public NutClient(string host, string upsName, string username, string password, bool useTls = false, int port = 3493, ILogger? logger = null)
+    public NutClient(string host, string upsName, bool useTls = false, int port = 3493, ILogger? logger = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(host);
         ArgumentException.ThrowIfNullOrWhiteSpace(upsName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(username);
-        ArgumentException.ThrowIfNullOrWhiteSpace(password);
         this.host = host;
         this.upsName = upsName;
         this.port = port;
         this.useTls = useTls;
-        this.username = username;
-        this.password = password;
         this.logger = logger;
     }
 
 
-    public async Task OpenAsync(CancellationToken cancellationToken)
+    public virtual async Task OpenAsync(CancellationToken cancellationToken)
     {
-        if (Connected)
-            throw new NutException("Client is already connected.", new InvalidOperationException("The socket is already connected."));
+        if (Connected) return;
+        //throw new NutException("Client is already connected.", new InvalidOperationException("The socket is already connected."));
         await ConnectAsync(cancellationToken);
         await GetVersionsAsync(cancellationToken);
         await TryStartTlsAsync(cancellationToken);
-        await AuthenticateAsync(cancellationToken);
     }
 
 
-    public async Task<CommandResult> ExecuteCommandAsync(Command command) => await ExecuteCommandAsync(command, [], CancellationToken.None);
-    public async Task<CommandResult> ExecuteCommandAsync(Command command, CancellationToken cancellationToken) => await ExecuteCommandAsync(command, [], cancellationToken);
-    public async Task<CommandResult> ExecuteCommandAsync(Command command, string[] args, CancellationToken cancellationToken)
+    /// <summary>
+    /// Executes a NUT command asynchronously.
+    /// </summary>
+    /// <param name="command">The command to execute.</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation.
+    /// </returns>
+    /// <exception cref="NutException">Thrown when a communications or command error occurs.</exception>
+    /// <exception cref="ArgumentException">Thrown when an argument is invalid.</exception>
+    /// <exception cref="NotImplementedException">Thrown when a command is not yet supported.</exception>
+    public virtual async Task<CommandResult> ExecuteCommandAsync(Command command) => await ExecuteCommandAsync(command, [], CancellationToken.None);
+    /// <inheritdoc cref="ExecuteCommandAsync(Command)"/>
+    /// <param name="cancellationToken">A token for requesting cancellation of the task.</param>
+    public virtual async Task<CommandResult> ExecuteCommandAsync(Command command, CancellationToken cancellationToken) => await ExecuteCommandAsync(command, [], cancellationToken);
+    /// <inheritdoc cref="ExecuteCommandAsync(Command, CancellationToken)"/>
+    /// <param name="args">A string array of arguments for the command.</param>
+    public virtual async Task<CommandResult> ExecuteCommandAsync(Command command, string[] args, CancellationToken cancellationToken)
     {
         if (!Connected)
             throw new NutException("Client is not connected!");
@@ -133,7 +141,7 @@ public partial class NutClient : IDisposable
     }
 
 
-    private async Task ConnectAsync(CancellationToken cancellationToken)
+    protected virtual async Task ConnectAsync(CancellationToken cancellationToken)
     {
         try
         {
@@ -160,7 +168,7 @@ public partial class NutClient : IDisposable
     }
 
 
-    private async Task TryStartTlsAsync(CancellationToken cancellationToken)
+    protected virtual async Task TryStartTlsAsync(CancellationToken cancellationToken)
     {
         if (!useTls) return;
         CommandResult result = await ExecuteCommandAsync(Command.STARTTLS, cancellationToken);
@@ -177,7 +185,7 @@ public partial class NutClient : IDisposable
     }
 
 
-    private async Task GetVersionsAsync(CancellationToken cancellationToken)
+    protected virtual async Task GetVersionsAsync(CancellationToken cancellationToken)
     {
         Regex rex = new(@"\d?\.\d?(|\.\d?)");
         try
@@ -205,7 +213,24 @@ public partial class NutClient : IDisposable
     }
 
 
-    private async Task AuthenticateAsync(CancellationToken cancellationToken)
+    /// <summary>
+    /// Authenticates a client as a consumer of the UPS (e.g. upsmon) asynchronously.
+    /// This requires "upsmon secondary" or "upsmon primary" in upsd.users.<br/>
+    /// Use this to log the fact that a system is drawing power from this UPS.<br/>
+    /// The upsmon primary will wait until the count of attached systems reaches 1 — itself.This allows the secondaries to shut down first.
+    /// </summary>
+    /// <param name="username">The username for the UPS.</param>
+    /// <param name="password">The password for the UPS.</param>
+    /// <param name="cancellationToken">
+    /// A <see cref="CancellationToken"/> for cancelling the task.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation.
+    /// </returns>
+    /// <exception cref="NutException">
+    /// Thrown when an error occurs (communication or command).
+    /// </exception>
+    public virtual async Task AuthenticateAsync(string username, string password, CancellationToken cancellationToken)
     {
         CommandResult result = await ExecuteCommandAsync(Command.USERNAME, [username], cancellationToken);
         if (result.Error != Error.None)
@@ -222,7 +247,7 @@ public partial class NutClient : IDisposable
     }
 
 
-    private async Task WriteStreamAsync(string command)
+    protected virtual async Task WriteStreamAsync(string command)
     {
         if (!Connected)
             throw new NutException("Client not connected!");
@@ -238,7 +263,7 @@ public partial class NutClient : IDisposable
     }
 
 
-    private async Task<string[]?> GetResponseAsync(Command command, CancellationToken cancellationToken)
+    protected virtual async Task<string[]?> GetResponseAsync(Command command, CancellationToken cancellationToken)
     {
         if (!Connected)
             throw new NutException("Client not connected!");

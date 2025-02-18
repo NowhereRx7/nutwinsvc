@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace nutupsdrv
 {
@@ -40,9 +35,14 @@ namespace nutupsdrv
     //    }
     //    return TRUE;  // Successful DLL_PROCESS_ATTACH.
     //}
+    
+    /// <summary>
+    /// May or may not need this.  .NET does generate an entry point on its own.
+    /// </summary>
     class Main
     {
         [System.Runtime.InteropServices.UnmanagedCallersOnly(EntryPoint = "DllMain")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "API")]
         public static bool DllMain(IntPtr hinstDll, uint fdwReason, IntPtr lpvReserved)
         {
 

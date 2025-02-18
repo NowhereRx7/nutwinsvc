@@ -9,16 +9,6 @@ public unsafe class Driver
 {
     //https://learn.microsoft.com/en-us/windows-hardware/drivers/battery/ups-minidriver-functionality
 
-    public enum UpsState : UInt32
-    {
-        None = 0,
-        Online = 1,
-        OnBattery = 2,
-        LowBattery = 4,
-        NoComm = 8,
-        Critical = 16,
-    }
-
     public enum InitState : UInt32
     {
         UnknownError = 0,
@@ -33,7 +23,8 @@ public unsafe class Driver
 
     const UInt32 INFINITE = 0xFFFFFF;
 
-    static CancellationTokenSource cancellationTokenSource = null;
+    static CancellationTokenSource waitTokenSource = null;
+    static UpsRegistry upsReg = null;
 
     /// <summary>
     /// The UPSInit function initializes a UPS minidriver, opens communication to the UPS unit, updates the registry, and causes the minidriver to start monitoring the UPS unit.
@@ -51,7 +42,10 @@ public unsafe class Driver
     [return: MarshalAs(UnmanagedType.U4)]
     public static InitState UPSInit()
     {
-        cancellationTokenSource ??= new();
+        waitTokenSource ??= new();
+        try { upsReg ??= new(); }
+        catch { return InitState.RegistryError; }
+        //TODO: Startup comms
         return InitState.OK;
     }
 
@@ -89,14 +83,16 @@ public unsafe class Driver
     /// A value of INFINITE means the interval never elapses.
     /// </param>
     [UnmanagedCallersOnly(EntryPoint = "UPSWaitForStateChange")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "API")]
     public static void UPSWaitForStateChange([In, MarshalAs(UnmanagedType.U4)] UpsState aCurrentState, [In] UInt32 anInterval)
     {
         if (anInterval == INFINITE)
         {
-            Task.Delay(-1, cancellationTokenSource.Token).GetAwaiter().GetResult();
-        } else
+            Task.Delay(-1, waitTokenSource.Token).GetAwaiter().GetResult();
+        }
+        else
         {
-            Task.Delay((int)anInterval, cancellationTokenSource.Token).GetAwaiter().GetResult();
+            Task.Delay((int)anInterval, waitTokenSource.Token).GetAwaiter().GetResult();
         }
     }
 
@@ -106,12 +102,7 @@ public unsafe class Driver
     [UnmanagedCallersOnly(EntryPoint = "UPSCancelWait")]
     public static void UPSCancelWait()
     {
-        UPSCancelWaitImpl();
-    }
-
-    private static void UPSCancelWaitImpl()
-    {
-        cancellationTokenSource.Cancel();
+        waitTokenSource.Cancel();
     }
 
     /// <summary>
@@ -121,9 +112,9 @@ public unsafe class Driver
     /// Specifies the minimum amount of time, in seconds, to wait before turning off the UPS unit's power outlets.
     /// </param>
     [UnmanagedCallersOnly(EntryPoint = "UPSTurnOff")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "API")]
     public static void UPSTurnOff([In] UInt32 aTurnOffDelay)
     {
-
     }
 
     /// <summary>
@@ -132,10 +123,13 @@ public unsafe class Driver
     [UnmanagedCallersOnly(EntryPoint = "UPSStop")]
     public static void UPSStop()
     {
-        UPSCancelWaitImpl();
+        waitTokenSource.Cancel();
+        //TODO: Shutdown
         Task.Delay(100).GetAwaiter().GetResult();
-        cancellationTokenSource.Dispose();
-        cancellationTokenSource = null;
+        waitTokenSource.Dispose();
+        waitTokenSource = null;
+        upsReg.Dispose();
+        upsReg = null;
     }
 
 }

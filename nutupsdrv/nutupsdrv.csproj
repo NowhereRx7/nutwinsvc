@@ -21,7 +21,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="nutupsdrv.inf" />
+    <Content Include="nutupsdrv.inf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NutClient\NutClient.csproj" />
   </ItemGroup>
 
 </Project>
