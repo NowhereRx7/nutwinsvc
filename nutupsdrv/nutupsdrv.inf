@@ -1,0 +1,19 @@
+﻿[version]
+Signature="$WINDOWS NT$"
+DriverVer=06/26/2001,1.0.0.0
+SetupClass=BASE
+
+[DefaultInstall]
+CopyFiles = NutUPS_CopyFiles
+AddReg    = NutUPS_AddReg
+
+[DestinationDirs]
+DefaultDestDir = 11
+NutUPS_CopyFiles = 11
+
+[NutUPS_CopyFiles]
+nutupsdrv.dll
+
+[NutUPS_AddReg]
+HKLM,"SYSTEM\CurrentControlSet\Services\UPS\ServiceProviders\nutupsdrv\","NUT UPS MiniDriver",0x0,"0x1;nutupsdrv.dll"
+

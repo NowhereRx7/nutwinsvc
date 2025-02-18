@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nutwinsvc.Tests", "NutTest\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NutClient", "NutClient\NutClient.csproj", "{BC01C6B6-19AC-46C2-9EC1-C778AF947542}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nutupsdrv", "nutupsdrv\nutupsdrv.csproj", "{396E272B-39B8-4FA2-B7CD-E7F2048307FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nutupsdrv_old", "nutupsdrv_old\nutupsdrv_old.csproj", "{605C7C0E-7016-8B1F-5B44-8342CCB70B9D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,8 +31,19 @@ Global
 		{BC01C6B6-19AC-46C2-9EC1-C778AF947542}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC01C6B6-19AC-46C2-9EC1-C778AF947542}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC01C6B6-19AC-46C2-9EC1-C778AF947542}.Release|Any CPU.Build.0 = Release|Any CPU
+		{396E272B-39B8-4FA2-B7CD-E7F2048307FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{396E272B-39B8-4FA2-B7CD-E7F2048307FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{396E272B-39B8-4FA2-B7CD-E7F2048307FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{396E272B-39B8-4FA2-B7CD-E7F2048307FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{605C7C0E-7016-8B1F-5B44-8342CCB70B9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{605C7C0E-7016-8B1F-5B44-8342CCB70B9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{605C7C0E-7016-8B1F-5B44-8342CCB70B9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{605C7C0E-7016-8B1F-5B44-8342CCB70B9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {97DAB07C-C51C-4F73-B812-F3D60594A16C}
 	EndGlobalSection
 EndGlobal
